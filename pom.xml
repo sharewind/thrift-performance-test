@@ -1,0 +1,120 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.sohu.cloudatlas</groupId>
+        <version>1.0-SNAPSHOT</version>
+        <artifactId>cloudatlas-root-pom</artifactId>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.sohu.cloudatlas</groupId>
+	<artifactId>thrift-performace-test</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+	    <pmd.sourceEncoding>UTF-8</pmd.sourceEncoding>
+	    <cobertura.encoding>UTF-8</cobertura.encoding>
+	    <resources.encoding>UTF-8</resources.encoding>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	    <compile.encoding>UTF-8</compile.encoding>
+	</properties>
+
+    <profiles>
+        <profile>
+            <id>test</id>
+            <properties>
+                <package.target>test</package.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>live</id>
+            <properties>
+                <package.target>live</package.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>devp</id>
+            <properties>
+                <package.target>devp</package.target>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.9.1</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>slf4j-api</artifactId>
+            		<groupId>org.slf4j</groupId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- logger 日志工具 -->
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <version>1.7.5</version>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+		    <!-- 打包插件 -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>${artifactId}</finalName>
+                    <descriptors>
+                        <descriptor>src/main/assembly/distribution.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 配置区分环境  -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources-${package.target}</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
