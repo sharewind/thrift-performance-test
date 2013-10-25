@@ -1,65 +1,58 @@
 package com.sohu.cloudatlas.server;
 
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.thrift.transport.TTransportException;
 
 import com.sohu.cloudatlas.services.UserService;
 
 public class HelloClient {
 
-	private static final Logger logger = LoggerFactory.getLogger(HelloClient.class);
-
 	public static void main(String[] args) throws Exception {
+		String host = null;
+		int port = 0, concurrency = 0;
+		try {
+			host = args[0];
+			port = Integer.parseInt(args[1]);
+			concurrency = Integer.parseInt(args[2]);
+		} catch (Exception e) {
+			printUsage();
+			System.exit(1);
+		}
 
-		long start = System.currentTimeMillis();
-		int count = 0;
-		int taskCount = 10000;
-
-//		AtomicInteger finishedCount = new AtomicInteger(0);
-
-		ExecutorService executors = Executors.newFixedThreadPool(10000);
-		final CountDownLatch countDownLatch = new CountDownLatch(taskCount);
-
-		while(++count < taskCount){
-			executors.submit(new Runnable() {
-
+		final String HOST = host;
+		final int PORT = port;
+		for (int i = 0; i < concurrency; ++i) {
+			new Thread() {
 				@Override
 				public void run() {
-					try{
-						doRequest();
-					}catch (Exception e) {
-						logger.error(e.getMessage(),e);
-					}finally{
-						countDownLatch.countDown();
+					TTransport transport = new TFramedTransport(new TSocket(HOST, PORT));
+					TBinaryProtocol binaryProtocol = new TBinaryProtocol(transport);
+					UserService.Client client = new UserService.Client.Factory().getClient(binaryProtocol);
+
+					try {
+						transport.open();
+					} catch (TTransportException e) {
+						e.printStackTrace();
+					}
+
+					while (true) {
+						try {
+							client.sayHi("world");
+						} catch (TException e) {
+							e.printStackTrace();
+						}
 					}
 				}
-			});
+			}.start();
 		}
-		countDownLatch.await();
-		long costTime = System.currentTimeMillis() - start;
-		double tps = taskCount/(costTime/1000.0);
-		logger.info(String.format("%s ",tps));
 	}
 
-	private static void doRequest() throws Exception {
-		TTransport transport = new TFramedTransport(new TSocket("localhost", 12345));
-		TBinaryProtocol binaryProtocol = new TBinaryProtocol(transport);
-		UserService.Client client = new UserService.Client.Factory().getClient(binaryProtocol);
-
-		transport.open();
-		String response = client.sayHi("world");
-		System.out.println(response);
-		transport.close();
+	private static void printUsage() {
+		System.out.println("Usage: java com.sohu.cloudatlas.server.HelloClient" + " <host> <port> <concurrency>");
 	}
+
 }
