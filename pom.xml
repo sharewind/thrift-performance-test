@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.sohu.cloudatlas</groupId>
-	<artifactId>thrift-performace-test</artifactId>
+	<artifactId>thrift-performance-test</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>

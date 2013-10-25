@@ -1,0 +1,19 @@
+
+1. start the server:
+bash shell/deploy.sh
+cd target
+tar -zxvf thrift-performace-test-dist.tar.gz
+java -cp lib/*:classes com.sohu.cloudatlas.server.HelloApp
+
+2. start the client
+cd target
+java -cp lib/*:classes com.sohu.cloudatlas.server.HelloClient 127.0.0.1 12345 5000
+
+3. platform
+CPU 16cores
+Memory 16G
+Clients 5
+
+4. Result
+10k+ tps
+24k+ connections
